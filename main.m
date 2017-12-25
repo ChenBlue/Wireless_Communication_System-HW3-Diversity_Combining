@@ -1,10 +1,11 @@
-sample_num = 1000000;
+sample_num = 50000;
 gI = normrnd(0,sqrt(var(i)),1,sample_num);
 
 enr_dB = 1;
-Pe_sc = zeros(4,5);
-Pe_mrc = zeros(4,5);
-Pe_egc = zeros(4,5);
+Pe_sc = zeros(5, 4);
+Pe_mrc = zeros(5,4);
+Pe_egc = zeros(5,4);
+Pe_dc = zeros(5,4);
 tic
 for enr_index = 1:5
     enr_dB = (enr_index-1)*2+1;
@@ -39,6 +40,7 @@ for enr_index = 1:5
         r_sc = zeros(2,sample_num);
         result_sc = zeros(2, sample_num);
         error_count = 0;
+
         for i = 1:sample_num
            r_sc(:,i) = r(:,i,I(i));
            loss1 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[1;1]));
@@ -57,27 +59,29 @@ for enr_index = 1:5
                result_sc(:,i) = [-1;-1];
            end
         end
-        
+    
         % Calculate error of probability
         %wrong = result_sc~= data;
         %error_count = sum(sum(wrong));
         %Pe_sc(enr_index, L) = error_count/sample_num/2;
         Pe_sc(enr_index, L) = get_error_prob(result_sc, data, sample_num*2);
-        
+
         % Maximal Ratio Combining
         r_mrc = real(sum(conj(g_tmp).*r,3));
         result_mrc = (r_mrc > 0)*2 -1;
-        Pe_mrc(enr_index, L) = get_error_prob(result_mrc, data, sample_num*2);
-        %wrong = result_mrc~= data;
-        %error_count = sum(sum(wrong));
-        %Pe_mrc(enr_index, L) = error_count/sample_num/2;
+        Pe_mrc(enr_index, L) = get_error_prob(result_mrc, data, sample_num);
         
         % Equal Gain Combining
         r_egc = real(sum(exp(-1i*angle(g_tmp)).*r,3));
         result_egc = (r_egc > 0)*2 -1;
-        Pe_egc(enr_index, L) = get_error_prob(result_egc, data, sample_num*2);
+        Pe_egc(enr_index, L) = get_error_prob(result_egc, data, sample_num);
         
         % Direct Combining
+        diversity_sum = sum(r,3);
+        %r_dc = real(exp(-1i*angle(diversity_sum)).*diversity_sum);
+        r_dc = real(diversity_sum);
+        result_dc = (r_dc > 0)*2 -1;
+        Pe_dc(enr_index, L) = get_error_prob(result_dc, data, sample_num);
     end
 end
 toc
@@ -88,4 +92,5 @@ figure,plot(Pe_mrc)
 set(gca, 'YScale', 'log')
 figure,plot(Pe_egc)
 set(gca, 'YScale', 'log')
+figure,plot(Pe_dc)
 
