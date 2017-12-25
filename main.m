@@ -1,9 +1,10 @@
-sample_num = 100000;
+sample_num = 1000000;
 gI = normrnd(0,sqrt(var(i)),1,sample_num);
 
 enr_dB = 1;
 Pe_sc = zeros(4,5);
 Pe_mrc = zeros(4,5);
+Pe_egc = zeros(4,5);
 tic
 for enr_index = 1:5
     enr_dB = (enr_index-1)*2+1;
@@ -55,29 +56,36 @@ for enr_index = 1:5
            else
                result_sc(:,i) = [-1;-1];
            end
-
         end
         
         % Calculate error of probability
-        wrong = result_sc~= data;
-        error_count = sum(sum(wrong));
-        Pe_sc(enr_index, L) = error_count/sample_num/2;
+        %wrong = result_sc~= data;
+        %error_count = sum(sum(wrong));
+        %Pe_sc(enr_index, L) = error_count/sample_num/2;
+        Pe_sc(enr_index, L) = get_error_prob(result_sc, data, sample_num*2);
         
         % Maximal Ratio Combining
         r_mrc = real(sum(conj(g_tmp).*r,3));
         result_mrc = (r_mrc > 0)*2 -1;
-        wrong = result_mrc~= data;
-        error_count = sum(sum(wrong));
-        Pe_mrc(enr_index, L) = error_count/sample_num/2;
+        Pe_mrc(enr_index, L) = get_error_prob(result_mrc, data, sample_num*2);
+        %wrong = result_mrc~= data;
+        %error_count = sum(sum(wrong));
+        %Pe_mrc(enr_index, L) = error_count/sample_num/2;
         
         % Equal Gain Combining
+        r_egc = real(sum(exp(-1i*angle(g_tmp)).*r,3));
+        result_egc = (r_egc > 0)*2 -1;
+        Pe_egc(enr_index, L) = get_error_prob(result_egc, data, sample_num*2);
         
+        % Direct Combining
     end
 end
 toc
 %error_count
-%figure,plot(Pe_sc)
-%set(gca, 'YScale', 'log')
 figure,plot(Pe_sc)
+set(gca, 'YScale', 'log')
+figure,plot(Pe_mrc)
+set(gca, 'YScale', 'log')
+figure,plot(Pe_egc)
 set(gca, 'YScale', 'log')
 
