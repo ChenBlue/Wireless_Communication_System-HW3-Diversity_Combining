@@ -1,8 +1,10 @@
-sample_num = 20000;
+sample_num = 100000;
 gI = normrnd(0,sqrt(var(i)),1,sample_num);
 
 enr_dB = 1;
-Pe = zeros(4,5);
+Pe_sc = zeros(4,5);
+Pe_mrc = zeros(4,5);
+tic
 for enr_index = 1:5
     enr_dB = (enr_index-1)*2+1;
     enr = 10^(enr_dB/10);
@@ -25,8 +27,8 @@ for enr_index = 1:5
         gq = normrnd(0,1,1,sample_num,L);
         g = gi + 1i*gq;
         g_tmp = repmat(g,2,1,1);
-        tx_data = repmat(data,1,1,L);
 
+        tx_data = repmat(data,1,1,L);
         % received signal
         r = g_tmp.*tx_data + n;
 
@@ -38,9 +40,7 @@ for enr_index = 1:5
         error_count = 0;
         for i = 1:sample_num
            r_sc(:,i) = r(:,i,I(i));
-           %loss1 = sum(abs(r_sc(:,i) - g_tmp(:,1,I(i)).*[1;1]));
            loss1 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[1;1]));
-           %loss1 = abs(r_sc(:,i) - g_tmp(:,1,I(i)).*[1;1]);
            loss2 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[1;-1]));
            loss3 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[-1;1]));
            loss4 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[-1;-1]));
@@ -58,12 +58,26 @@ for enr_index = 1:5
 
         end
         
+        % Calculate error of probability
         wrong = result_sc~= data;
         error_count = sum(sum(wrong));
-        Pe(enr_index, L) = error_count/sample_num;
+        Pe_sc(enr_index, L) = error_count/sample_num/2;
+        
+        % Maximal Ratio Combining
+        r_mrc = real(sum(conj(g_tmp).*r,3));
+        result_mrc = (r_mrc > 0)*2 -1;
+        wrong = result_mrc~= data;
+        error_count = sum(sum(wrong));
+        Pe_mrc(enr_index, L) = error_count/sample_num/2;
+        
+        % Equal Gain Combining
+        
     end
 end
+toc
 %error_count
-figure,plot(Pe)
+%figure,plot(Pe_sc)
+%set(gca, 'YScale', 'log')
+figure,plot(Pe_sc)
 set(gca, 'YScale', 'log')
 
