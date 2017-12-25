@@ -1,96 +1,126 @@
-sample_num = 50000;
-gI = normrnd(0,sqrt(var(i)),1,sample_num);
+sample_num = 5000000;
 
-enr_dB = 1;
-Pe_sc = zeros(5, 4);
-Pe_mrc = zeros(5,4);
-Pe_egc = zeros(5,4);
-Pe_dc = zeros(5,4);
+% Preallocation for error of probability
+Pe_sc = zeros(5, 4, 2);
+Pe_mrc = zeros(5,4, 2);
+Pe_egc = zeros(5,4, 2);
+Pe_dc = zeros(5,4, 2);
 tic
-for enr_index = 1:5
-    enr_dB = (enr_index-1)*2+1;
-    enr = 10^(enr_dB/10);
 
-    % generate QPSK data
-    data = rand(2,sample_num); 
-    data = 2*(data > 0.5)-1;
+for R = 0:1
+    for enr_index = 1:5
+        enr_dB = (enr_index-1)*2+1; % energy-to-noise ratio:1, 3, 5, 7, 9 dB
+        enr = 10^(enr_dB/10); 
 
-    Edata = sqrt(2); % symbol energy
-    En = Edata/enr; % noise energy
+        % generate QPSK data (2 bits)
+        data = rand(2,sample_num); % 2*sample_num matrix
+        data = 2*(data > 0.5)-1; % map to -1, 1
 
-    
-    for L = 1:4
-        ni = normrnd(0,sqrt(En/2),2,sample_num,L);
-        nq = normrnd(0,sqrt(En/2),2,sample_num,L);
-        n = ni + 1i*nq;
+        Edata = sqrt(2); % symbol energy
+        En = Edata/enr; % noise energy
 
-        % generate fading gain
-        gi = normrnd(0,1,1,sample_num,L);
-        gq = normrnd(0,1,1,sample_num,L);
-        g = gi + 1i*gq;
-        g_tmp = repmat(g,2,1,1);
+        for L = 1:4
+            % generate noise
+            n = normrnd(0,sqrt(En/2),2,sample_num,L) + 1i*normrnd(0,sqrt(En/2),2,sample_num,L);
 
-        tx_data = repmat(data,1,1,L);
-        % received signal
-        r = g_tmp.*tx_data + n;
+            % generate fading gain (R=0: Rayleigh; R=1: Riciean)
+            g = normrnd(R,1,1,sample_num,L) + 1i*normrnd(R,1,1,sample_num,L);
+            g_tmp = repmat(g,2,1,1); % replicate for 2 bits
 
-        % Selective combining
-        g_abs = abs(g);
-        [g_max, I] = max(g_abs,[],3);
-        r_sc = zeros(2,sample_num);
-        result_sc = zeros(2, sample_num);
-        error_count = 0;
+            tx_data = repmat(data,1,1,L); % replicate for L branches
+            % received signal
+            r = g_tmp.*tx_data + n; 
 
-        for i = 1:sample_num
-           r_sc(:,i) = r(:,i,I(i));
-           loss1 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[1;1]));
-           loss2 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[1;-1]));
-           loss3 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[-1;1]));
-           loss4 = sum(abs(r_sc(:,i) - g_tmp(:,i,I(i)).*[-1;-1]));
-           [~,index] = min([loss1 loss2 loss3 loss4]);
-           size(index);
-           if index==1
-               result_sc(:,i) = [1;1];
-           elseif index == 2
-               result_sc(:,i) = [1;-1];
-           elseif index == 3
-               result_sc(:,i) = [-1;1];
-           else
-               result_sc(:,i) = [-1;-1];
-           end
+            %%% Selective combining %%%
+            g_abs = abs(g); % energy of fading gain
+            [g_max, I] = max(g_abs,[],3); % find index of fading gain
+            r_sc_tmp = zeros(2,sample_num); 
+            g_sc = zeros(2,sample_num);
+
+            % Select corresponding fading gain and received signal from indices
+            for i = 1:sample_num
+               r_sc_tmp(:,i) = r(:,i,I(i)); 
+               g_sc(:,i) = g_tmp(:,i,I(i));
+            end
+            r_sc = real(exp(-1i*angle(g_sc)).*r_sc_tmp); % remove the phase shift
+            result_sc = (r_sc > 0)*2 -1; % map to +1, -1
+
+            % Calculate error of probability
+            Pe_sc(enr_index, L, R+1) = get_error_prob(result_sc, data, sample_num);
+
+            %%% Maximal Ratio Combining %%%
+            r_mrc = real(sum(conj(g_tmp).*r,3)); 
+            result_mrc = (r_mrc > 0)*2 -1;
+            Pe_mrc(enr_index, L, R+1) = get_error_prob(result_mrc, data, sample_num);
+
+            %%% Equal Gain Combining %%%
+            r_egc = real(sum(exp(-1i*angle(g_tmp)).*r,3));
+            result_egc = (r_egc > 0)*2 -1;
+            Pe_egc(enr_index, L, R+1) = get_error_prob(result_egc, data, sample_num);
+
+            %%% Direct Combining %%%
+            %r_dc = real(exp(-1i*angle(sum(r,3))).*sum(r,3));
+            r_dc = real(sum(r,3));
+            result_dc = (r_dc > 0)*2 -1;
+            Pe_dc(enr_index, L, R+1) = get_error_prob(result_dc, data, sample_num);
         end
-    
-        % Calculate error of probability
-        %wrong = result_sc~= data;
-        %error_count = sum(sum(wrong));
-        %Pe_sc(enr_index, L) = error_count/sample_num/2;
-        Pe_sc(enr_index, L) = get_error_prob(result_sc, data, sample_num*2);
-
-        % Maximal Ratio Combining
-        r_mrc = real(sum(conj(g_tmp).*r,3));
-        result_mrc = (r_mrc > 0)*2 -1;
-        Pe_mrc(enr_index, L) = get_error_prob(result_mrc, data, sample_num);
-        
-        % Equal Gain Combining
-        r_egc = real(sum(exp(-1i*angle(g_tmp)).*r,3));
-        result_egc = (r_egc > 0)*2 -1;
-        Pe_egc(enr_index, L) = get_error_prob(result_egc, data, sample_num);
-        
-        % Direct Combining
-        diversity_sum = sum(r,3);
-        %r_dc = real(exp(-1i*angle(diversity_sum)).*diversity_sum);
-        r_dc = real(diversity_sum);
-        result_dc = (r_dc > 0)*2 -1;
-        Pe_dc(enr_index, L) = get_error_prob(result_dc, data, sample_num);
     end
 end
 toc
-%error_count
-figure,plot(Pe_sc)
+
+% Plot Rayleigh
+figure,plot(Pe_sc(:,:,1),'-*')
 set(gca, 'YScale', 'log')
-figure,plot(Pe_mrc)
+title('BER of Selective Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
+
+figure,plot(Pe_mrc(:,:,1),'-*')
 set(gca, 'YScale', 'log')
-figure,plot(Pe_egc)
+title('BER of Maximal Ratio Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
+
+figure,plot(Pe_egc(:,:,1),'-*')
 set(gca, 'YScale', 'log')
-figure,plot(Pe_dc)
+title('BER of Equal Gain Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
+
+figure,plot(Pe_dc(:,:,1),'-*')
+title('BER of Direct Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
+
+% Plot Riciean
+figure,plot(Pe_sc(:,:,2),'-*')
+set(gca, 'YScale', 'log')
+title('BER of Selective Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
+
+figure,plot(Pe_mrc(:,:,2),'-*')
+set(gca, 'YScale', 'log')
+title('BER of Maximal Ratio Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
+
+figure,plot(Pe_egc(:,:,2),'-*')
+set(gca, 'YScale', 'log')
+title('BER of Equal Gain Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
+
+figure,plot(Pe_dc(:,:,2),'-*')
+title('BER of Direct Combining (Rayleigh)');
+legend('L=1','L=2','L=3','L=4');
+xlabel('SNR (dB)');
+ylabel('Bit error rate');
 
