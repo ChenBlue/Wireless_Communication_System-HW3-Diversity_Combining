@@ -1,14 +1,15 @@
 sample_num = 1000000;
 
-% Preallocation for error of probability
-Pe_sc = zeros(5, 4, 2);
-Pe_mrc = zeros(5,4, 2);
-Pe_egc = zeros(5,4, 2);
-Pe_dc = zeros(5,4, 2);
+% Preallocation for Bit error rate
+Pe_sc = zeros(5, 4, 2); % selective combining
+Pe_mrc = zeros(5,4, 2); % maximal ratio combining
+Pe_egc = zeros(5,4, 2); % equal gain combining
+Pe_dc = zeros(5,4, 2); % direct combining
 tic
 
-for R = 0:1
-    if R == 0
+for R = 0:1 % Rayleigh:0 ; Ricean:1
+    % Different fading channel has different variance
+    if R == 0  
         sigma = 1/sqrt(2);
     else
         sigma = 1/2;
@@ -30,7 +31,7 @@ for R = 0:1
 
             % generate fading gain (R=0: Rayleigh; R=1: Riciean)
             g = normrnd(R/2,sigma,1,sample_num,L) + 1i*normrnd(R/sqrt(2),1/2,1,sample_num,L);
-            g_tmp = repmat(g,2,1,1); % replicate for 2 bits
+            g_tmp = repmat(g,2,1,1); % replicate for 2 bits (QPSK)
 
             tx_data = repmat(data,1,1,L); % replicate for L branches
             % received signal
@@ -50,23 +51,23 @@ for R = 0:1
             r_sc = real(exp(-1i*angle(g_sc)).*r_sc_tmp); % remove the phase shift
             result_sc = (r_sc > 0)*2 -1; % map to +1, -1
 
-            % Calculate error of probability
+            % Calculate bit error rate
             Pe_sc(enr_index, L, R+1) = get_error_prob(result_sc, data, sample_num);
 
             %%% Maximal Ratio Combining %%%
-            r_mrc = real(sum(conj(g_tmp).*r,3)); 
-            result_mrc = (r_mrc > 0)*2 -1;
+            r_mrc = real(sum(conj(g_tmp).*r,3)); % weighted by fading gain and combine
+            result_mrc = (r_mrc > 0)*2 -1; % Detection
             Pe_mrc(enr_index, L, R+1) = get_error_prob(result_mrc, data, sample_num);
 
             %%% Equal Gain Combining %%%
-            r_egc = real(sum(exp(-1i*angle(g_tmp)).*r,3));
-            result_egc = (r_egc > 0)*2 -1;
+            r_egc = real(sum(exp(-1i*angle(g_tmp)).*r,3)); % Cancel phase shift and combine
+            result_egc = (r_egc > 0)*2 -1; % Detection
             Pe_egc(enr_index, L, R+1) = get_error_prob(result_egc, data, sample_num);
 
             %%% Direct Combining %%%
             %r_dc = real(exp(-1i*angle(sum(r,3))).*sum(r,3));
-            r_dc = real(sum(r,3));
-            result_dc = (r_dc > 0)*2 -1;
+            r_dc = real(sum(r,3)); % Sum up directly
+            result_dc = (r_dc > 0)*2 -1; % Detection
             Pe_dc(enr_index, L, R+1) = get_error_prob(result_dc, data, sample_num);
         end
     end
