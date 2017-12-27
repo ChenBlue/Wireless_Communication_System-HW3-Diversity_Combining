@@ -6,8 +6,8 @@ There are L (L = 1, 2, 3, 4) diversity branches of uncorrelated Rayleigh/Ricean 
 3. Equal Gain Combining
 4. Direct Combining
 
-## Implementation
-### Selective Combining
+## Algorithm
+### Selective Combining (SC)
 Select the branch with highest signal-to-noise from received signal. 
 SNR of received signal: </br>
 $$ SNR=\frac{|g_k |^2 E_s}{E[n^2 ]}, k=1~L $$
@@ -15,11 +15,11 @@ Because $\frac{E_s }{E[n^2 ]}$ is fixed, we only have to find largest $|g_k |^2$
 Next, compensate the phase shift $\phi _m $, where $g_k=\alpha _k e^{j\phi _k }$
 $$ r(t)=\tilde{r}_m (t)\times e^{-j\phi _m } $$
 
-### Maximal Ratio Combining
+### Maximal Ratio Combining (MRC)
 The diversity branches are weighted by their complex fading gains and then combined.
 $$ r(t)=\sum \_{k=1} ^L g_k ^* \tilde{r}(t)=\sum \_{k=1} ^L g_k ^* g_k \tilde{s}(t)+\sum \_{k=1} ^L g_k ^* \tilde{n}(t)=\sum \_{k=1} ^L |α_k |^2 \tilde{s}(t)+noise $$
 
-### Equal Gain Combining
+### Equal Gain Combining (EGC)
 Since QPSK has equal energy symbols, EGC is useful. The diversity branches are not weighted. We compensate the phase shift and combine all branches.
 $$ r(t)=\sum \_{k=1} ^L e^{-j\phi _k } \tilde{r} _k (t)=\sum \_{k=1} ^L e^{-j\phi _k } g_k \tilde{s}(t)+\sum \_{k=1}^L e^{-j\phi _k } \tilde{n}_k (t)=\sum \_{k=1} ^L \alpha _k \tilde{s}(t)+noise $$
 
@@ -27,3 +27,36 @@ $$ r(t)=\sum \_{k=1} ^L e^{-j\phi _k } \tilde{r} _k (t)=\sum \_{k=1} ^L e^{-j\ph
 Combine all signals of branches directly and then compensates the overall phase shift.
 $$ r(t)=e^{-j\phi } \sum \_{k=1} ^L \tilde{r} _k (t),    φ=∡(\sum \_{k=1} ^L \tilde{r} _k(t)) $$
 
+## Result
+### Rayleigh fading channel
+1. Selective Combining
+![ray_sc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_SC.jpg)
+2. Maxmial Ratio Combining
+![ray_mrc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_MRC.jpg)
+3. Equal Gain Combining
+![ray_egc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_EGC.jpg)
+4. Direct Combining
+![ray_dc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_DC.jpg)
+
+### Ricean fading channel
+1. Selective Combining
+![ric_sc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_SC.jpg)
+2. Maxmial Ratio Combining
+![ric_mrc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_MRC.jpg)
+3. Equal Gain Combining
+![ric_egc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_EGC.jpg)
+4. Direct Combining
+![ric_dc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_DC.jpg)
+
+### Comparison among all combining strategies
+The following 2 figures are both use 4 branches.
+1. Rayleigh
+![ray_all](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/Rayleigh_all.jpg)
+2. Ricean
+![ric_all](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/Ricean_all.jpg)
+Performance: MRC > EGC > SC > DC
+
+### Comparison between Rayleigh & Ricean channel
+The following figure use Equal gain combining with 4 branches.
+![ray_ric](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/Ray%26Ric.jpg)
+Performance: Ricean > Rayleigh
