@@ -38,37 +38,16 @@ for R = 0:1 % Rayleigh:0 ; Ricean:1
             r = g_tmp.*tx_data + n; 
 
             %%% Selective combining %%%
-            g_abs = abs(g); % energy of fading gain
-            [g_max, I] = max(g_abs,[],3); % find index of fading gain
-            r_sc_tmp = zeros(2,sample_num); 
-            g_sc = zeros(2,sample_num);
-
-            % Select corresponding fading gain and received signal from indices
-            for i = 1:sample_num
-               r_sc_tmp(:,i) = r(:,i,I(i)); 
-               g_sc(:,i) = g_tmp(:,i,I(i));
-            end
-            r_sc = real(exp(-1i*angle(g_sc)).*r_sc_tmp); % remove the phase shift
-            result_sc = (r_sc > 0)*2 -1; % map to +1, -1
-
-            % Calculate bit error rate
-            Pe_sc(enr_index, L, R+1) = get_error_prob(result_sc, data, sample_num);
+            [Pe_sc(enr_index, L, R+1), result_sc] = selective_combining(g, g_tmp, r, sample_num, data);
 
             %%% Maximal Ratio Combining %%%
-            r_mrc = real(sum(conj(g_tmp).*r,3)); % weighted by fading gain and combine
-            result_mrc = (r_mrc > 0)*2 -1; % Detection
-            Pe_mrc(enr_index, L, R+1) = get_error_prob(result_mrc, data, sample_num);
+            [Pe_mrc(enr_index, L, R+1), result_mrc] = maximal_ratio_combining(g_tmp, r, sample_num, data);
 
             %%% Equal Gain Combining %%%
-            r_egc = real(sum(exp(-1i*angle(g_tmp)).*r,3)); % Cancel phase shift and combine
-            result_egc = (r_egc > 0)*2 -1; % Detection
-            Pe_egc(enr_index, L, R+1) = get_error_prob(result_egc, data, sample_num);
+            [Pe_egc(enr_index, L, R+1), result_egc] = equal_gain_combining(g_tmp, r, sample_num, data);
 
             %%% Direct Combining %%%
-            %r_dc = real(exp(-1i*angle(sum(r,3))).*sum(r,3));
-            r_dc = real(sum(r,3)); % Sum up directly
-            result_dc = (r_dc > 0)*2 -1; % Detection
-            Pe_dc(enr_index, L, R+1) = get_error_prob(result_dc, data, sample_num);
+            [Pe_dc(enr_index, L, R+1), result_dc] = direct_combining(r, sample_num, data);
         end
     end
 end
