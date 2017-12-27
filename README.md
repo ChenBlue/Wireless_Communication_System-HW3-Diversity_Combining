@@ -28,23 +28,28 @@ Combine all signals of branches directly and then compensates the overall phase 
 $$ r(t)=e^{-j\phi } \sum \_{k=1} ^L \tilde{r} _k (t),    φ=∡(\sum \_{k=1} ^L \tilde{r} _k(t)) $$
 
 ## Result
-### Rayleigh fading channel
+#### Rayleigh fading channel
 1. Selective Combining
-![ray_sc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_SC.jpg)
+
+![ray_sc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_SC.jpg) </br>
+
 2. Maxmial Ratio Combining
-![ray_mrc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_MRC.jpg)
-3. Equal Gain Combining
-![ray_egc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_EGC.jpg)
+
+![ray_mrc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_MRC.jpg) </br>
+3. Equal Gain Combining </br>
+![ray_egc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_EGC.jpg) </br>
 4. Direct Combining
 ![ray_dc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/rayleigh_DC.jpg)
 
 ### Ricean fading channel
-1. Selective Combining
+1. Selective Combining </br>
 ![ric_sc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_SC.jpg)
 2. Maxmial Ratio Combining
+</br>
 ![ric_mrc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_MRC.jpg)
 3. Equal Gain Combining
 ![ric_egc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_EGC.jpg)
+</br>
 4. Direct Combining
 ![ric_dc](https://github.com/ChenBlue/Wireless_Communication_System-HW3-Diversity_Combining/blob/master/FIG/ricean_DC.jpg)
 
