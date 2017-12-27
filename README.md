@@ -11,7 +11,12 @@ There are L (L = 1, 2, 3, 4) diversity branches of uncorrelated Rayleigh/Ricean 
 Select the branch with highest signal-to-noise from received signal. 
 SNR of received signal: </br>
 $$ SNR=\frac{|g_k |^2 E_s}{E[n^2 ]}, k=1~L $$
-Because $E_s /(E[n^2 ])$ is fixed, we only have to find largest $|g_k |^2$ among all branches.
-Next, compensate the phase shift $\phi _m $, where $g_k=\alpha _k e^(j\phi _k )$
+Because $\frac{E_s }{E[n^2 ]}$ is fixed, we only have to find largest $|g_k |^2$ among all branches. </br>
+Next, compensate the phase shift $\phi _m $, where $g_k=\alpha _k e^{j\phi _k }$
 $$ r(t)=\tilde{r}_m (t)\times e^{-j\phi _m } $$
+
+### Maximal Ratio Combining
+The diversity branches are weighted by their complex fading gains and then combined.
+$$ r(t)=\sum \_{k=1} ^L g_k ^* \tilde{r}(t)=\sum \_{k=1} ^L g_k ^* g_k \tilde{s}(t)+\sum \_{k=1} ^L g_k ^* \tilde{n}(t)=\sum \_{k=1} ^L |α_k |^2 \tilde{s}(t)+noise $$
+
 
