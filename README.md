@@ -19,4 +19,6 @@ $$ r(t)=\tilde{r}_m (t)\times e^{-j\phi _m } $$
 The diversity branches are weighted by their complex fading gains and then combined.
 $$ r(t)=\sum \_{k=1} ^L g_k ^* \tilde{r}(t)=\sum \_{k=1} ^L g_k ^* g_k \tilde{s}(t)+\sum \_{k=1} ^L g_k ^* \tilde{n}(t)=\sum \_{k=1} ^L |α_k |^2 \tilde{s}(t)+noise $$
 
-
+### Equal Gain Combining
+Since QPSK has equal energy symbols, EGC is useful. The diversity branches are not weighted. We compensate the phase shift and combine all branches.
+$$ r(t)=\sum \_{k=1} ^L e^{-j\phi _k } \tilde{r} _k (t)=\sum \_{k=1} ^L e^{-j\phi _k } g_k \tilde{s}(t)+\sum \_{k=1}^L e^{-j\phi _k } \tilde{n}_k (t)=\sum \_{k=1} ^L \alpha _k \tilde{s}(t)+noise $$
