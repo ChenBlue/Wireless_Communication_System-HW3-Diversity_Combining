@@ -22,3 +22,8 @@ $$ r(t)=\sum \_{k=1} ^L g_k ^* \tilde{r}(t)=\sum \_{k=1} ^L g_k ^* g_k \tilde{s}
 ### Equal Gain Combining
 Since QPSK has equal energy symbols, EGC is useful. The diversity branches are not weighted. We compensate the phase shift and combine all branches.
 $$ r(t)=\sum \_{k=1} ^L e^{-j\phi _k } \tilde{r} _k (t)=\sum \_{k=1} ^L e^{-j\phi _k } g_k \tilde{s}(t)+\sum \_{k=1}^L e^{-j\phi _k } \tilde{n}_k (t)=\sum \_{k=1} ^L \alpha _k \tilde{s}(t)+noise $$
+
+### Direct Combining
+Combine all signals of branches directly and then compensates the overall phase shift.
+$$ r(t)=e^{-j\phi } \sum \_{k=1} ^L \tilde{r} _k (t),    φ=∡(\sum \_{k=1} ^L \tilde{r} _k(t)) $$
+
