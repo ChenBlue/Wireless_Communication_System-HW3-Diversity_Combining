@@ -10,7 +10,7 @@ There are L (L = 1, 2, 3, 4) diversity branches of uncorrelated Rayleigh/Ricean 
 ### Selective Combining (SC)
 Select the branch with highest signal-to-noise from received signal. 
 SNR of received signal: </br>
-$$ SNR=\frac{|g_k |^2 E_s}{E[n^2 ]}, k=1~L $$
+$$ SNR=\frac{|g_k |^2 E_s}{E[n^2 ]}, k=1-L $$
 Because $\frac{E_s }{E[n^2 ]}$ is fixed, we only have to find largest $|g_k |^2$ among all branches. </br>
 Next, compensate the phase shift $\phi _m $, where $g_k=\alpha _k e^{j\phi _k }$
 $$ r(t)=\tilde{r}_m (t)\times e^{-j\phi _m } $$
